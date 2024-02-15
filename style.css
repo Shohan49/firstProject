@@ -19,4 +19,11 @@
     text-align: start;
 }
 
+.button {
+    background-color: green;
+    padding: 15px 50px;
+    font-size: 20px;
+    color: white;
+}
+
 
