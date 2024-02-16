@@ -5,66 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Information from</title>
     <link rel="stylesheet" href="style.css">
-
-    <style>
-        h2 {
-            font-size: 28px;
-            font-weight: bolder;
-            text-align: center;
-        }
-        body {
-            background-color: aliceblue;
-        }
-    </style>
-
 </head>
 <body>
-    
-    <h2 style="color: tomato;">House member form</h2>
-    <a href="personal information.html">Go to info!</a>
+    <h2 class="header">House member form</h2>
+    <a href="personal information.html" target="_blank">Go to info!</a>
 
-    <form style="text-align: center; background-color: cadetblue;">
+    <!-- member information form -->
+    <form class="member-form">
         <div>
-            <label for="name" style="font-size: small; font-weight: 400;">Name</label><br>
+            <label for="name" class="form-label">Name</label><br>
             <input type="text" id="name"><br><br>
-            <!--Information-->
         </div>
 
         <div>
-            <label for="phoneNumber" style="font-size: small; font-weight: 400;">Phone Number</label><br>
+            <label for="phoneNumber" class="form-label">Phone Number</label><br>
             <input type="text" id="phoneNumber"><br><br>
         </div>
 
         <div>
-            <label for="homeTown" style="font-size: small; font-weight: 400;">Home Town</label><br>
+            <label for="homeTown" class="form-label">Home Town</label><br>
             <input type="text"  id="homeTown"><br><br>
         </div>
 
         <div>
-            <label for="jobType" style="font-size: small; font-weight: 400;">Profession</label><br>
+            <label for="jobType" class="form-label">Profession</label><br>
             <input type="radio" name="profession" id="student" value="student">
-            <label for="profession" style="font-size: small; font-weight: 400;">Student</label>
+            <label for="profession" class="form-label-radio">Student</label>
             <input type="radio" name="profession" id="job" value="job">
-            <label for="profession" style="font-size: small; font-weight: 400;">Job</label><br><br>
+            <label for="profession" class="form-label-radio">Job</label><br><br>
         </div>
 
         <div>
-            <label for="nidCard" style="font-size: small; font-weight: 400;">Nid Card Number</label><br>
+            <label for="nidCard" class="form-label">Nid Card Number</label><br>
             <input type="text" name="nidCard" id="nidCard"><br><br>
         </div>
 
         <div>
-            <label for="bloodGroup" style="font-size: small; font-weight: 400;">Blood Group</label><br>
+            <label for="bloodGroup" class="form-label">Blood Group</label><br>
             <input type="text" name="bloodGroup" id="bloodGroup"><br><br>    
         </div>
 
         <div>
-            <label for="email" style="font-size: small; font-weight: 400;">Email Address</label><br>
+            <label for="email" class="form-label">Email Address</label><br>
             <input type="text" name="email" id="email"><br><br><br>
         </div>
 
         <div>
-            <label for="anotherPhoneNumber" style="font-size: small; font-weight: 400;">Another Phone Number</label><br>
+            <label for="anotherPhoneNumber" class="form-label">Another Phone Number</label><br>
             <input type="text" name="anotherPhoneNumber" id="anotherPhoneNumber"><br>
         </div>
 
@@ -76,7 +63,5 @@
         
         
     </form>
-
-    <p style="font-size: 20px; font-weight: 500; color: black; text-align: center;">This is Abdul Azim Shohan</p>
 </body>
 </html>

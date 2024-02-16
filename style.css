@@ -9,12 +9,8 @@
     width: 500px;
 }
 
-.body {
-    text-align: center;
-    /*
-    color: #b0e4a1;
-    */
-    
+body {
+    background-color: aliceblue;
 }
 
 .head {
@@ -35,4 +31,25 @@ a:hover {
     background-color: yellow;
 }
 
+.header {
+    text-align: center;
+    font-size: 46px;
+    color: white;
+    background-color: black;
+    border: 5px solid red;
+}
+
+.member-form {
+    text-align: center;
+}
+
+.form-label {
+    font-size: 14px; 
+    font-weight: 600;
+}
+
+.form-label-radio {
+    font-weight: 400;
+    font-size: 12px;
+}
 
