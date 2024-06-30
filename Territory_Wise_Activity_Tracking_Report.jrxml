@@ -292,10 +292,10 @@ ORDER BY t1.wingId,t1.divisionId,t1.teritoryId]]>
 	<variable name="lighterMemoTotal_2" class="java.lang.Integer" resetType="Group" resetGroup="divisionName" calculation="Sum">
 		<variableExpression><![CDATA[$F{lighterMemoTotal}]]></variableExpression>
 	</variable>
-	<variable name="avgVisitTime_2" class="java.lang.Integer" resetType="Group" resetGroup="divisionName" calculation="Sum">
+	<variable name="avgVisitTime_2" class="java.lang.Integer" resetType="Group" resetGroup="divisionName" calculation="Average">
 		<variableExpression><![CDATA[$F{avgVisitTime}]]></variableExpression>
 	</variable>
-	<variable name="avgMemoTime_2" class="java.lang.Integer" resetType="Group" resetGroup="divisionName" calculation="Sum">
+	<variable name="avgMemoTime_2" class="java.lang.Integer" resetType="Group" resetGroup="divisionName" calculation="Average">
 		<variableExpression><![CDATA[$F{avgMemoTime}]]></variableExpression>
 	</variable>
 	<variable name="totalOutlet_3" class="java.lang.Integer" resetType="Group" resetGroup="wingId" calculation="Sum">
@@ -379,10 +379,10 @@ ORDER BY t1.wingId,t1.divisionId,t1.teritoryId]]>
 	<variable name="lighterMemoTotal_3" class="java.lang.Integer" resetType="Group" resetGroup="wingId" calculation="Sum">
 		<variableExpression><![CDATA[$F{lighterMemoTotal}]]></variableExpression>
 	</variable>
-	<variable name="avgVisitTime_3" class="java.lang.Integer" resetType="Group" resetGroup="wingId" calculation="Sum">
+	<variable name="avgVisitTime_3" class="java.lang.Integer" resetType="Group" resetGroup="wingId" calculation="Average">
 		<variableExpression><![CDATA[$F{avgVisitTime}]]></variableExpression>
 	</variable>
-	<variable name="avgMemoTime_3" class="java.lang.Integer" resetType="Group" resetGroup="wingId" calculation="Sum">
+	<variable name="avgMemoTime_3" class="java.lang.Integer" resetType="Group" resetGroup="wingId" calculation="Average">
 		<variableExpression><![CDATA[$F{avgMemoTime}]]></variableExpression>
 	</variable>
 	<variable name="totalOutlet_4" class="java.lang.Integer" calculation="Sum">
@@ -466,10 +466,10 @@ ORDER BY t1.wingId,t1.divisionId,t1.teritoryId]]>
 	<variable name="lighterMemoTotal_4" class="java.lang.Integer" calculation="Sum">
 		<variableExpression><![CDATA[$F{lighterMemoTotal}]]></variableExpression>
 	</variable>
-	<variable name="avgVisitTime_4" class="java.lang.Integer" calculation="Sum">
+	<variable name="avgVisitTime_4" class="java.lang.Integer" calculation="Average">
 		<variableExpression><![CDATA[$F{avgVisitTime}]]></variableExpression>
 	</variable>
-	<variable name="avgMemoTime_4" class="java.lang.Integer" calculation="Sum">
+	<variable name="avgMemoTime_4" class="java.lang.Integer" calculation="Average">
 		<variableExpression><![CDATA[$F{avgMemoTime}]]></variableExpression>
 	</variable>
 	<group name="wingId">
