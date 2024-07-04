@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.20.0.final using JasperReports Library version 6.20.0-2bc7ab61c56f459e8176eb05c7705e145cd400ad  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="TMR_wise_expenditure_report_value_with_surprise_gift" pageWidth="3020" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="3552af83-ca6b-42e5-9d9a-84eb5c24a45a">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="TMR_wise_expenditure_report_value_with_surprise_gift" pageWidth="3400" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="3552af83-ca6b-42e5-9d9a-84eb5c24a45a">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="TEST_TM"/>
 	<parameter name="fromDate" class="java.lang.String"/>
 	<parameter name="toDate" class="java.lang.String"/>
@@ -16,6 +16,7 @@
                sum(NUMBEROFCONTACTED)         contactQuantity,  
                sum(BundlePack)                pack10s,  
                sum(totalVaoGift)              totalVaoGift,  
+               sum(branded_match)             brandedMatch,
                sum(Pocket_Deodorant)          pocketDeodorant,  
                sum(lighter)                   lighter,  
                sum(cigarette)                 cigarette,  
@@ -32,12 +33,15 @@
                 sum(bundleAma3in1) bundleAma3in1,
                 sum(bundleChanachur) bundleChanachur,
                 sum(bundleJhalmuri) bundleJhalmuri,
+                sum(innovativeMatch) innovativeMatch,
                sum(VISITEDOUTLET)             visitedOutlet,  
                sum(mmtMATCHGIFTCONSUMER1)     mmtmatchGiftConsumer,  
                sum(regularMATCHGIFTCONSUMER1) regularmatchGiftConsumer,  
                sum(MATCHGIFTRETAILER)         matchGiftRetailer,  
                sum(sampling1)                 sampling,  
-               sum(SWAPPING_NO)               swapping  
+               sum(SWAPPING_NO)               swapping,
+               sum(innoMatch10sMsb) innoMatch10sMsb,
+               sum(innoMatch20sMsb) innoMatch20sMsb
         FROM (WITH giftCount as  
                        (SELECT BR_USER_USER_ID, to_char(bg.ADD_DATE_TIME, 'dd-mm-yyyy') activityDate, count(1) giftCnt  
                         FROM apptm.BRGIFT bg  
@@ -63,7 +67,8 @@
                              when ba.contact_module IN ('SUN_MOON_BRAZILIAN', 'SUN_MOON_BRAZILIAN_FCC') AND  
                                   ba.BUNDLE_PRODUCT_QTY > 0 then 1  
                              when ba.contact_module IN ('SUN_MOON_AMERICAN', 'SUN_MOON_AMERICAN_FCC') AND  
-                                  ba.BUNDLE_PRODUCT_QTY > 0 then 1  
+                                  ba.BUNDLE_PRODUCT_QTY > 0 then 1 
+                             when ba.contact_module IN ('MSB_LEP_CAMPAIGN') AND ba.BUNDLE_PRODUCT_QTY > 0 then 1 
                              else 0 end)                   BundlePack,  
           
                      sum(case  
@@ -86,10 +91,15 @@
                      sum(ba.sampling_no)                   sampling1,  
                      sum(ba.SWAPPING_NO)                   SWAPPING_NO,  
                      sum(CASE  
-                             WHEN gi.id IN (17, 18, 35, 36, 37,38,42,43,44,45,46,47)  
+                             WHEN gi.id IN (15,17, 18, 35, 36, 37,38,42,43,44,45,46,47)  
                                  THEN vs.quantity  
                              ELSE 0  
-                         END)                              totalVaoGift,  
+                         END)                              totalVaoGift, 
+                         sum(CASE  
+                             WHEN gi.id = 15  
+                                 THEN vs.quantity  
+                             ELSE 0  
+                         END)                              branded_match,  
                      sum(CASE  
                              WHEN gi.id = 35  
                                  THEN vs.quantity  
@@ -178,7 +188,23 @@
                            WHEN ba.BUNDLE_GIFT_ID =41
                                THEN ba.bundle_gift_qty 
                            ELSE 0  
-                       END)                              bundleJhalmuri
+                       END)                              bundleJhalmuri,
+                       sum(CASE  
+                           WHEN ba.BUNDLE_GIFT_ID =48
+                               THEN ba.bundle_gift_qty 
+                           ELSE 0  
+                       END)                              innovativeMatch,
+                       
+                       count(CASE  
+                             WHEN gi.id = 48 and vs.product_id=4  
+                                 THEN vs.quantity  
+                             ELSE null  
+                         END)                              innoMatch10sMsb,
+                         count(CASE  
+                             WHEN gi.id = 48 and vs.product_id=5 
+                                 THEN vs.quantity  
+                             ELSE null  
+                         END)                              innoMatch20sMsb
               FROM apptm.BRACTIVITY ba  
                        JOIN apptm.V_TERITORY_ALL vta ON vta.ROUTE_ID = ba.ROUTE_ID  
                        JOIN apptm.BRUSER b ON b.USER_ID = ba.BR_USER_ID  
@@ -189,7 +215,7 @@
                        LEFT JOIN apptm.gift_items gi ON vs.gift_item_id = gi.id  
               WHERE ba.TARGET_DATE BETWEEN TO_DATE($P{fromDate}, 'dd-mm-yyyy') AND TO_DATE($P{toDate}, 'dd-mm-yyyy')  
                 AND vta.DIVISION_ID = $P{divisionId}  
-                AND vta.TERITORY_ID LIKE '%' || $P{territoryId} || '%'  
+                and vta.teritory_id like $P{territoryId} || '%'
               GROUP BY vta.division_name, vta.TERITORY_ID, vta.TERITORY_NAME, b.USER_NAME, ba.BR_USER_ID, br.NAME, bg.giftCnt,  
                        to_char(ba.TARGET_DATE, 'dd-mm-yyyy'))  
                 GROUP BY division_Name, TERITORY_ID, TERITORY_NAME, BR_USER_ID, USER_ID, USER_NAME  
@@ -224,6 +250,10 @@
 	<field name="bundleAma3in1" class="java.lang.Integer"/>
 	<field name="bundleChanachur" class="java.lang.Integer"/>
 	<field name="bundleJhalmuri" class="java.lang.Integer"/>
+	<field name="innovativeMatch" class="java.lang.Integer"/>
+	<field name="innoMatch10sMsb" class="java.lang.Integer"/>
+	<field name="innoMatch20sMsb" class="java.lang.Integer"/>
+	<field name="brandedMatch" class="java.lang.Integer"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -255,7 +285,7 @@
 				<textFieldExpression><![CDATA["To Date : "+$P{toDate}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="2590" y="59" width="390" height="20" uuid="1c4d4a0b-fc40-4c38-adc7-419e81314520"/>
+				<reportElement x="2970" y="59" width="390" height="20" uuid="1c4d4a0b-fc40-4c38-adc7-419e81314520"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA["Execution Time : " +new  SimpleDateFormat("dd-MMM-yyyy, hh:mm:ss a").format(new java.util.Date())]]></textFieldExpression>
 			</textField>
@@ -343,7 +373,7 @@
 				<text><![CDATA[Contact Quantity]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="2160" y="0" width="110" height="40" backcolor="#4EE8FC" uuid="9002bfe2-15de-4492-a21d-4c79323f8274"/>
+				<reportElement mode="Opaque" x="2460" y="0" width="110" height="40" backcolor="#4EE8FC" uuid="9002bfe2-15de-4492-a21d-4c79323f8274"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -356,7 +386,7 @@
 				<text><![CDATA[Packet Sales/Bundle Sales]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="2590" y="0" width="130" height="20" backcolor="#4EE8FC" uuid="7b6e10c3-2e5c-4acd-9613-d317b597772f"/>
+				<reportElement mode="Opaque" x="2970" y="0" width="130" height="20" backcolor="#4EE8FC" uuid="7b6e10c3-2e5c-4acd-9613-d317b597772f"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -369,7 +399,7 @@
 				<text><![CDATA[Match gift to consumer]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="2720" y="0" width="130" height="40" backcolor="#4EE8FC" uuid="2c40fac2-3239-4771-83a9-d59adc270fb0"/>
+				<reportElement mode="Opaque" x="3100" y="0" width="130" height="40" backcolor="#4EE8FC" uuid="2c40fac2-3239-4771-83a9-d59adc270fb0"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -382,7 +412,7 @@
 				<text><![CDATA[Visited Outlet]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="2850" y="0" width="130" height="40" backcolor="#4EE8FC" uuid="179e4463-4b67-4e1b-8a8b-ba9a81acb532"/>
+				<reportElement mode="Opaque" x="3230" y="0" width="130" height="40" backcolor="#4EE8FC" uuid="179e4463-4b67-4e1b-8a8b-ba9a81acb532"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -421,7 +451,7 @@
 				<text><![CDATA[Sampling]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="2590" y="20" width="70" height="20" backcolor="#4EE8FC" uuid="cd85ec8c-526b-4eda-b35d-464ff380ccb0"/>
+				<reportElement mode="Opaque" x="2970" y="20" width="70" height="20" backcolor="#4EE8FC" uuid="cd85ec8c-526b-4eda-b35d-464ff380ccb0"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -434,7 +464,7 @@
 				<text><![CDATA[MBD]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="2660" y="20" width="60" height="20" backcolor="#4EE8FC" uuid="603b7972-1627-4200-b214-82ffcb292932"/>
+				<reportElement mode="Opaque" x="3040" y="20" width="60" height="20" backcolor="#4EE8FC" uuid="603b7972-1627-4200-b214-82ffcb292932"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -629,7 +659,7 @@
 				<text><![CDATA[Jhalmuri + Chanachur]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="2270" y="0" width="320" height="15" backcolor="#4EE8FC" uuid="560df292-c4bc-4f72-b1d6-3031058bb07c">
+				<reportElement mode="Opaque" x="2570" y="0" width="400" height="20" backcolor="#4EE8FC" uuid="560df292-c4bc-4f72-b1d6-3031058bb07c">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -642,11 +672,10 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="9"/>
 				</textElement>
-				<text><![CDATA[Bundle ]]></text>
+				<text><![CDATA[Bundle  Gift]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="2270" y="15" width="80" height="25" backcolor="#4EE8FC" uuid="748ace4c-3c99-4ca4-8f67-07fb6b181133">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				<reportElement mode="Opaque" x="2570" y="20" width="80" height="20" backcolor="#4EE8FC" uuid="748ace4c-3c99-4ca4-8f67-07fb6b181133">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
@@ -661,8 +690,7 @@
 				<text><![CDATA[Sylon]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="2350" y="15" width="80" height="25" backcolor="#4EE8FC" uuid="7fbe1b15-77b8-45d7-8c2d-e874bb3b7c6f">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				<reportElement mode="Opaque" x="2650" y="20" width="80" height="20" backcolor="#4EE8FC" uuid="7fbe1b15-77b8-45d7-8c2d-e874bb3b7c6f">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
@@ -677,8 +705,7 @@
 				<text><![CDATA[Ama3in1]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="2510" y="15" width="80" height="25" backcolor="#4EE8FC" uuid="5cdbd727-e0bf-4f23-b9a4-e90a70da1eec">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				<reportElement mode="Opaque" x="2810" y="20" width="80" height="20" backcolor="#4EE8FC" uuid="5cdbd727-e0bf-4f23-b9a4-e90a70da1eec">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
@@ -693,7 +720,7 @@
 				<text><![CDATA[Jhalmuri]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="2430" y="15" width="80" height="25" backcolor="#4EE8FC" uuid="c641c945-2042-43b3-b5f9-e3ae300f97b8">
+				<reportElement mode="Opaque" x="2730" y="20" width="80" height="20" backcolor="#4EE8FC" uuid="c641c945-2042-43b3-b5f9-e3ae300f97b8">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -707,6 +734,60 @@
 					<font size="9"/>
 				</textElement>
 				<text><![CDATA[Chanachur]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="2890" y="20" width="80" height="20" backcolor="#4EE8FC" uuid="ac4c6e2a-515f-4af8-8c6c-9fc7ad310b86">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[Innovative Match]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="2160" y="0" width="100" height="40" backcolor="#4EE8FC" uuid="02f27b2a-09c5-4f8c-9a88-1aab17b507c5"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[10s + Innovative Match]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="2260" y="0" width="100" height="40" backcolor="#4EE8FC" uuid="31775b94-51a5-49d0-8f76-a1248227420c"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[20s + Innovative Match]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="2360" y="0" width="100" height="40" backcolor="#4EE8FC" uuid="5bef3b59-f613-4eb7-b666-4dd908420dad"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[Branded Match]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
@@ -770,7 +851,7 @@
 				<textFieldExpression><![CDATA[$F{userName}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="2660" y="0" width="60" height="20" uuid="88b915bd-1fea-4922-881a-8794e9d3ff9b"/>
+				<reportElement x="3040" y="0" width="60" height="20" uuid="88b915bd-1fea-4922-881a-8794e9d3ff9b"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -792,7 +873,7 @@
 				<textFieldExpression><![CDATA[$F{contactQuantity}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="2160" y="0" width="110" height="20" uuid="746f7f3c-e74a-4bf2-943d-0b3dd7608d66"/>
+				<reportElement x="2460" y="0" width="110" height="20" uuid="746f7f3c-e74a-4bf2-943d-0b3dd7608d66"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -803,7 +884,7 @@
 				<textFieldExpression><![CDATA[$F{pack10s}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="2720" y="0" width="130" height="20" uuid="daef63e0-0a20-49fe-ae13-77edec34b5e3"/>
+				<reportElement x="3100" y="0" width="130" height="20" uuid="daef63e0-0a20-49fe-ae13-77edec34b5e3"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -814,7 +895,7 @@
 				<textFieldExpression><![CDATA[$F{visitedOutlet}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="2850" y="0" width="130" height="20" uuid="69a3a849-4fce-43b9-9a91-d310533b1c79"/>
+				<reportElement x="3230" y="0" width="130" height="20" uuid="69a3a849-4fce-43b9-9a91-d310533b1c79"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -825,7 +906,7 @@
 				<textFieldExpression><![CDATA[$F{matchGiftRetailer}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="2590" y="0" width="70" height="20" uuid="e0a8e52e-12c6-4757-80e2-33c975da110a"/>
+				<reportElement x="2970" y="0" width="70" height="20" uuid="e0a8e52e-12c6-4757-80e2-33c975da110a"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -1001,7 +1082,7 @@
 				<textFieldExpression><![CDATA[$F{sylonJhalmuri}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="2270" y="0" width="80" height="20" uuid="6b3c72d8-8c3c-4900-b23b-da06d0e9935f">
+				<reportElement x="2570" y="0" width="80" height="20" uuid="6b3c72d8-8c3c-4900-b23b-da06d0e9935f">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
@@ -1014,7 +1095,7 @@
 				<textFieldExpression><![CDATA[$F{bundleSylon}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="2350" y="0" width="80" height="20" uuid="1daec92e-fe24-400a-9ea7-a520f2494018">
+				<reportElement x="2650" y="0" width="80" height="20" uuid="1daec92e-fe24-400a-9ea7-a520f2494018">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
@@ -1027,7 +1108,7 @@
 				<textFieldExpression><![CDATA[$F{bundleAma3in1}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="2510" y="0" width="80" height="20" uuid="e464dc57-79ac-45ab-b933-d99a670b3522">
+				<reportElement x="2810" y="0" width="80" height="20" uuid="e464dc57-79ac-45ab-b933-d99a670b3522">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
@@ -1040,7 +1121,7 @@
 				<textFieldExpression><![CDATA[$F{bundleJhalmuri}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="2430" y="0" width="80" height="20" uuid="64d0a348-93ab-45fe-93fa-f94eb123ba84">
+				<reportElement x="2730" y="0" width="80" height="20" uuid="64d0a348-93ab-45fe-93fa-f94eb123ba84">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
@@ -1051,6 +1132,52 @@
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{bundleChanachur}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="2890" y="0" width="80" height="20" uuid="56afeb92-b420-400d-bebd-ef343decbf0f">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{innovativeMatch}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="2160" y="0" width="100" height="20" uuid="7b282a17-7464-49d5-a3e3-49514d406bd5"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{innoMatch10sMsb}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="2260" y="0" width="100" height="20" uuid="702a01ff-d83a-4249-8d29-74766cc9cf35"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{innoMatch20sMsb}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="2360" y="0" width="100" height="20" uuid="476275dc-46b2-4db4-b08f-492b8760ed5c"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{brandedMatch}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
